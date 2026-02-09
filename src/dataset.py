@@ -1,31 +1,31 @@
 import numpy as np
 import pandas as pd
 
-def load_data(n_samples=500):
-    study_hours = np.random.uniform(0, 10, n_samples)
-    attendance = np.random.uniform(0, 100, n_samples)
-    previous_gpa = np.random.uniform(0, 4, n_samples)
-    assignments = np.random.uniform(0, 100, n_samples)
-    sleep_hours = np.random.uniform(0, 12, n_samples)
+def generate_student_data(num_students=500):
+    study_hours = np.random.uniform(0, 10, num_students)
+    attendance = np.random.uniform(0, 100, num_students)
+    previous_gpa = np.random.uniform(0, 4, num_students)
+    assignments = np.random.uniform(0, 100, num_students)
+    sleep_hours = np.random.uniform(0, 12, num_students)
 
-    final_score = (
+    final_scores = (
         5 * study_hours +
         0.3 * attendance +
         10 * previous_gpa +
         0.4 * assignments -
         2 * sleep_hours +
-        np.random.normal(0, 5, n_samples)
+        np.random.normal(0, 5, num_students)
     )
-    final_score = np.clip(final_score, 0, 100)
-    pass_fail = (final_score >= 50).astype(int)
+    final_scores = np.clip(final_scores, 0, 100)
+    pass_fail = (final_scores >= 50).astype(int)
 
-    df = pd.DataFrame({
+    data = pd.DataFrame({
         "StudyHours": study_hours,
         "Attendance": attendance,
         "PreviousGPA": previous_gpa,
         "Assignments": assignments,
         "SleepHours": sleep_hours,
-        "FinalScore": final_score,
+        "FinalScore": final_scores,
         "PassFail": pass_fail
     })
-    return df
+    return data

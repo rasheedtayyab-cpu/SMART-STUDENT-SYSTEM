@@ -1,17 +1,17 @@
 import os
 import pandas as pd
-from dataset import load_data
-from preprocess import preprocess_regression, preprocess_classification
-from supervised import run_regression, run_classification
-from unsupervised import run_clustering
-from reinforcement import simulate_study_strategy
+from dataset import generate_student_data
+from preprocess import split_for_regression, split_for_classification
+from supervised import train_score_model, train_pass_model
+from unsupervised import cluster_students
+from reinforcement import find_optimal_study_hours
 from sklearn.metrics import pairwise_distances_argmin_min
 
 if not os.path.isdir("outputs"):
     os.mkdir("outputs")
 
 def predict_student_outcome():
-    students = load_data()
+    students = generate_student_data()
 
     print("Enter the student's details to predict their outcome:")
     hours_studied = float(input("Study Hours per day (0-10): "))
@@ -28,22 +28,22 @@ def predict_student_outcome():
         "SleepHours": max(0, min(12, sleep_hours))
     }])
 
-    train_features, test_features, train_scores, test_scores = preprocess_regression(students)
-    score_model, _, _ = run_regression(train_features, test_features, train_scores, test_scores)
+    X_train_scores, X_test_scores, y_train_scores, y_test_scores = split_for_regression(students)
+    score_model, _, _ = train_score_model(X_train_scores, X_test_scores, y_train_scores, y_test_scores)
 
-    train_features_clf, test_features_clf, train_labels, test_labels = preprocess_classification(students)
-    pass_model, _ = run_classification(train_features_clf, test_features_clf, train_labels, test_labels)
+    X_train_pass, X_test_pass, y_train_pass, y_test_pass = split_for_classification(students)
+    pass_model, _ = train_pass_model(X_train_pass, X_test_pass, y_train_pass, y_test_pass)
 
     predicted_score = score_model.predict(student_input)[0]
     predicted_pass = pass_model.predict(student_input)[0]
 
-    clusters = run_clustering(students)
+    clusters = cluster_students(students)
     nearest_cluster, _ = pairwise_distances_argmin_min(
         student_input.values,
         students.drop(columns=["FinalScore", "PassFail"]).values
     )
 
-    suggested_hours = simulate_study_strategy()
+    suggested_hours = find_optimal_study_hours()
 
     print("\n=== Predicted Outcome ===")
     print(f"Estimated Final Score: {predicted_score:.2f}")
